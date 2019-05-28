@@ -2,7 +2,6 @@ mod utils;
 
 use wasm_bindgen::prelude::*;
 use std::fmt;
-use std::iter::FromIterator;
 
 extern crate web_sys;
 
@@ -88,11 +87,18 @@ impl Tetromino {
     }
 
 
-    pub fn move_shape_right(&mut self, board: &TetrisBoard) {
+    pub fn move_shape_right(&mut self) {
         self.block1 = self.block1 + 1;
         self.block2 = self.block2 + 1;
         self.block3 = self.block3 + 1;
         self.block4 = self.block4 + 1;
+    }
+
+    pub fn move_shape_left(&mut self) {
+        self.block1 = self.block1 - 1;
+        self.block2 = self.block2 - 1;
+        self.block3 = self.block3 - 1;
+        self.block4 = self.block4 - 1;
     }
 
     pub fn transform_bar(&mut self, board: &TetrisBoard){
@@ -118,22 +124,16 @@ pub fn check_number(num: &u32) -> Vec<u32> {
     num.to_string().chars().map(|d| d.to_digit(10).unwrap()).collect()
 }
 
-pub fn add_walls() -> Vec<u32> {
-        let space_used: Vec<u32> = vec![0; 200]
+pub fn add_walls() -> Vec<i32> {
+        let space_used: Vec<i32> = vec![0; 264]
             .into_iter()
             .enumerate()
             .map(|(i, mut e)| {
-                let separate_numbers = check_number(&(i as u32));
-                let n = separate_numbers.len() - 1;
-                let last_number = separate_numbers[n];
-                match last_number {
-                    9 => e = 3,
-                    0 => e = 3,
-                    _ => e = 0,
+                if i % 12 == 0 || i % 12 == 11 {
+                    e = 3
                 }
-                match i {
-                    i if i >= 190 => e = 3,
-                    _ => (),
+                else if i >= 252 {
+                    e = 2
                 }
                 e
             }).collect();
@@ -144,7 +144,7 @@ pub fn add_walls() -> Vec<u32> {
 #[wasm_bindgen]
 #[derive(Debug)]
 pub struct TetrisBoard {
-    space_used: Vec<u32>,
+    space_used: Vec<i32>,
     height: u32,
     width: u32,
 }
@@ -154,8 +154,8 @@ impl TetrisBoard {
     pub fn new() -> TetrisBoard {
         utils::set_panic_hook();
         let space_used = add_walls();
-        let height = 20;
-        let width = 10;
+        let height = 22;
+        let width = 12;
 
         TetrisBoard {
             space_used,
@@ -172,7 +172,7 @@ impl TetrisBoard {
         self.width
     }
 
-    pub fn get_space_used(&self) -> *const u32 {
+    pub fn get_space_used(&self) -> *const i32 {
         self.space_used.as_ptr()
     }
 
@@ -185,6 +185,26 @@ impl TetrisBoard {
         self.get_shape_position(tetronimo);
     }
 
+    pub fn check_wall_collision(&mut self, tetronimo: &Tetromino, direction: i32) -> bool {
+        let board_spaces: Vec <i32> = [tetronimo.block1 as i32, tetronimo.block2 as i32, tetronimo.block3 as i32, tetronimo.block4 as i32]
+            .into_iter()
+            .enumerate()
+            .map(|(i, e)| e + direction as i32)
+            .collect();
+        let mut result = true;
+        for space in board_spaces.iter() {
+            let mut counter = 0;
+            for element in self.space_used.iter_mut(){
+                if counter == *space as u32 && *element == 3 {
+                    result = false;
+                    break;
+                }
+                counter += 1;
+            }
+        }
+        result
+    }
+
     pub fn get_shape_position(&mut self, tetronimo: &Tetromino){
         for element in self.space_used.iter_mut() {
             if *element == 1 {
@@ -192,12 +212,11 @@ impl TetrisBoard {
             }
         }
         let board_spaces = [tetronimo.block1, tetronimo.block2, tetronimo.block3, tetronimo.block4];
-        log!("{:?}", board_spaces);
         for space in board_spaces.iter() {
             let mut counter = 0;
             for element in self.space_used.iter_mut(){
                 if counter == *space as u32 {
-                    *element = 1 as u32;
+                    *element = 1 as i32;
                 }
                 counter += 1;
             }
@@ -210,8 +229,19 @@ impl TetrisBoard {
     }
 
     pub fn move_shape_right(& mut self, tetronimo: &mut Tetromino){
-        tetronimo.move_shape_right(&self);
-        self.get_shape_position(tetronimo);
+        let can_move = self.check_wall_collision(tetronimo, 1);
+        if can_move == true {
+            tetronimo.move_shape_right();
+            self.get_shape_position(tetronimo);
+        }
+    }
+
+    pub fn move_shape_left(& mut self, tetronimo: &mut Tetromino){
+        let can_move = self.check_wall_collision(tetronimo, -1);
+        if can_move == true {
+            tetronimo.move_shape_left();
+            self.get_shape_position(tetronimo);
+        }
     }
 
     pub fn render(&self) -> String {
