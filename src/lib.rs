@@ -2,6 +2,7 @@ mod utils;
 
 use wasm_bindgen::prelude::*;
 use std::fmt;
+use std::iter::FromIterator;
 
 extern crate web_sys;
 
@@ -79,6 +80,21 @@ impl Tetromino {
         self.block_size
     }
 
+    pub fn move_shape_down(&mut self, board: &TetrisBoard) {
+        self.block1 = self.block1 + board.width;
+        self.block2 = self.block2 + board.width;
+        self.block3 = self.block3 + board.width;
+        self.block4 = self.block4 + board.width;
+    }
+
+
+    pub fn move_shape_right(&mut self, board: &TetrisBoard) {
+        self.block1 = self.block1 + 1;
+        self.block2 = self.block2 + 1;
+        self.block3 = self.block3 + 1;
+        self.block4 = self.block4 + 1;
+    }
+
     pub fn transform_bar(&mut self, board: &TetrisBoard){
         match self.position {
             Position::Right => {
@@ -98,6 +114,33 @@ impl Tetromino {
     }
 }
 
+pub fn check_number(num: &u32) -> Vec<u32> {
+    num.to_string().chars().map(|d| d.to_digit(10).unwrap()).collect()
+}
+
+pub fn add_walls() -> Vec<u32> {
+        let space_used: Vec<u32> = vec![0; 200]
+            .into_iter()
+            .enumerate()
+            .map(|(i, mut e)| {
+                let separate_numbers = check_number(&(i as u32));
+                let n = separate_numbers.len() - 1;
+                let last_number = separate_numbers[n];
+                match last_number {
+                    9 => e = 3,
+                    0 => e = 3,
+                    _ => e = 0,
+                }
+                match i {
+                    i if i >= 190 => e = 3,
+                    _ => (),
+                }
+                e
+            }).collect();
+        log!("{:?}", space_used);
+        space_used
+    }
+
 #[wasm_bindgen]
 #[derive(Debug)]
 pub struct TetrisBoard {
@@ -110,7 +153,7 @@ pub struct TetrisBoard {
 impl TetrisBoard {
     pub fn new() -> TetrisBoard {
         utils::set_panic_hook();
-        let space_used = vec![0; 200];
+        let space_used = add_walls();
         let height = 20;
         let width = 10;
 
@@ -139,10 +182,10 @@ impl TetrisBoard {
 
     pub fn update_shape_position(&mut self, tetronimo: &mut Tetromino) {
         tetronimo.transform_bar(&self);
-        self.generate_start_position(tetronimo);
+        self.get_shape_position(tetronimo);
     }
 
-    pub fn generate_start_position(&mut self, tetronimo: &Tetromino){
+    pub fn get_shape_position(&mut self, tetronimo: &Tetromino){
         for element in self.space_used.iter_mut() {
             if *element == 1 {
                 *element = 0
@@ -152,13 +195,23 @@ impl TetrisBoard {
         log!("{:?}", board_spaces);
         for space in board_spaces.iter() {
             let mut counter = 0;
-            for element in &mut self.space_used.iter_mut(){
-                if counter == *space as usize {
+            for element in self.space_used.iter_mut(){
+                if counter == *space as u32 {
                     *element = 1 as u32;
                 }
                 counter += 1;
             }
         }
+    }
+
+    pub fn move_shape_down(& mut self, tetronimo: &mut Tetromino){
+        tetronimo.move_shape_down(&self);
+        self.get_shape_position(tetronimo);
+    }
+
+    pub fn move_shape_right(& mut self, tetronimo: &mut Tetromino){
+        tetronimo.move_shape_right(&self);
+        self.get_shape_position(tetronimo);
     }
 
     pub fn render(&self) -> String {
@@ -170,7 +223,16 @@ impl fmt::Display for TetrisBoard {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     for line in self.space_used.as_slice().chunks(self.width as usize) {
       for &cell in line {
-        write!(f, "{}", cell)?;
+        let mut symbol = "";
+        println!("cell {}", cell);
+        match cell {
+            0 => symbol = "0",
+            1 => symbol = "1",
+            2 => symbol = "2",
+            3 => symbol = "3",
+            _ => (),
+        }
+        write!(f, "{}", symbol)?;
       }
       write!(f, "\n");
     }
