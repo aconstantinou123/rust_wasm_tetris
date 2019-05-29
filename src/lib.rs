@@ -479,8 +479,7 @@ impl TetrisBoard {
             tetronimo_clone.block4
         ];
         let mut result = 0;
-        let space_used_clone = self.space_used.clone();
-        for (i, e) in space_used_clone.iter().enumerate(){
+        for (i, e) in self.space_used.iter().enumerate(){
             let found_space = board_spaces.iter().find(|&&x| x == i as u32);
             if *e == 3 {
                 match found_space {
