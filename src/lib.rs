@@ -5,6 +5,7 @@ use std::fmt;
 
 extern crate web_sys;
 
+
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
 macro_rules! log {
     ( $( $t:tt )* ) => {
@@ -60,7 +61,117 @@ impl Tetromino {
         match rand {
             0 => Tetromino::new_bar_shape(),
             1 => Tetromino::new_hat_shape(),
+            2 => Tetromino::new_square_shape(),
+            3 => Tetromino::new_leg_shape(),
+            4 => Tetromino::new_reverse_leg_shape(),
+            5 => Tetromino::new_step_shape(),
+            6 => Tetromino::new_reverse_step_shape(),
             _ => Tetromino::new_bar_shape()
+        }
+    }
+
+    pub fn new_reverse_step_shape() -> Tetromino {
+        utils::set_panic_hook();
+        let block_size = 50;
+        let block1 = 5;
+        let block2 = block1 + 1;
+        let block3 = block1 - 11;
+        let block4 = block1 + 12;
+        let position = Position::Right;
+        let shape_type = ShapeType::ReverseStep;
+
+        Tetromino {
+            block_size,
+            block1,
+            block2,
+            block3,
+            block4,
+            position,
+            shape_type,
+        }
+    }
+
+    pub fn new_step_shape() -> Tetromino {
+        utils::set_panic_hook();
+        let block_size = 50;
+        let block1 = 5;
+        let block2 = block1 - 13;
+        let block3 = block1 - 12;
+        let block4 = block1 + 1;
+        let position = Position::Right;
+        let shape_type = ShapeType::Step;
+
+        Tetromino {
+            block_size,
+            block1,
+            block2,
+            block3,
+            block4,
+            position,
+            shape_type,
+        }
+    }
+
+    pub fn new_leg_shape() -> Tetromino {
+        utils::set_panic_hook();
+        let block_size = 50;
+        let block1 = 5;
+        let block2 = block1 - 12;
+        let block3 = block1 + 12;
+        let block4 = block1 + 13;
+        let position = Position::Right;
+        let shape_type = ShapeType::Leg;
+
+        Tetromino {
+            block_size,
+            block1,
+            block2,
+            block3,
+            block4,
+            position,
+            shape_type,
+        }
+    }
+
+    pub fn new_reverse_leg_shape() -> Tetromino {
+        utils::set_panic_hook();
+        let block_size = 50;
+        let block1 = 5;
+        let block2 = block1 - 12;
+        let block3 = block1 - 13;
+        let block4 = block1 + 12;
+        let position = Position::Right;
+        let shape_type = ShapeType::ReverseLeg;
+
+        Tetromino {
+            block_size,
+            block1,
+            block2,
+            block3,
+            block4,
+            position,
+            shape_type,
+        }
+    }
+
+    pub fn new_square_shape() -> Tetromino {
+        utils::set_panic_hook();
+        let block_size = 50;
+        let block1 = 5;
+        let block2 = block1 + 1;
+        let block3 = block1 + 12;
+        let block4 = block1 + 13;
+        let position = Position::Right;
+        let shape_type = ShapeType::Square;
+
+        Tetromino {
+            block_size,
+            block1,
+            block2,
+            block3,
+            block4,
+            position,
+            shape_type,
         }
     }
 
@@ -136,6 +247,10 @@ impl Tetromino {
         match self.shape_type {
             ShapeType::Bar => self.transform_bar(board),
             ShapeType::Hat => self.transform_hat(board),
+            ShapeType::Leg => self.transform_leg(board),
+            ShapeType::ReverseLeg => self.transform_reverse_leg(board),
+            ShapeType::Step => self.transform_step(board),
+            ShapeType::ReverseStep => self.transform_reverse_step(board),
             _ => ()
         }
     }
@@ -153,6 +268,42 @@ impl Tetromino {
                 self.block2 = self.block1 + 1;
                 self.block3 = self.block1 + 2;
                 self.block4 = self.block1 + 3;
+            },
+            _ => ()
+        }
+    }
+
+    pub fn transform_step(&mut self, board: &TetrisBoard){
+        match self.position {
+            Position::Right => {
+                self.position = Position::Down;
+                self.block2 = self.block1 - board.width + 1;
+                self.block3 = self.block1 + 1;
+                self.block4 = self.block1 + board.width;
+            },
+            Position::Down => {
+                self.position = Position::Right;
+                self.block2 = self.block1 - board.width - 1;
+                self.block3 = self.block1 - board.width;
+                self.block4 = self.block1 + 1;
+            },
+            _ => ()
+        }
+    }
+
+    pub fn transform_reverse_step(&mut self, board: &TetrisBoard){
+        match self.position {
+            Position::Right => {
+                self.position = Position::Down;
+                self.block2 = self.block1 - board.width;
+                self.block3 = self.block1 + 1;
+                self.block4 = self.block1 + board.width + 1;
+            },
+            Position::Down => {
+                self.position = Position::Right;
+                self.block2 = self.block1 + 1;
+                self.block3 = self.block1 + board.width - 1;
+                self.block4 = self.block1 + board.width;
             },
             _ => ()
         }
@@ -182,6 +333,66 @@ impl Tetromino {
                 self.position = Position::Right;
                 self.block2 = self.block1 - board.width;
                 self.block3 = self.block1 + 1;
+                self.block4 = self.block1 + board.width;
+            },
+            _ => ()
+        }
+    }
+
+    pub fn transform_leg(&mut self, board: &TetrisBoard){
+        match self.position {
+            Position::Right => {
+                self.position = Position::Down;
+                self.block2 = self.block1 - board.width + 1;
+                self.block3 = self.block1 - 1;
+                self.block4 = self.block1 + 1;
+            },
+            Position::Down => {
+                self.position = Position::Left;
+                self.block2 = self.block1 - board.width - 1;
+                self.block3 = self.block1 - board.width;
+                self.block4 = self.block1 + board.width;
+            },
+            Position::Left => {
+                self.position = Position::Up;
+                self.block2 = self.block1 - 1;
+                self.block3 = self.block1 + 1;
+                self.block4 = self.block1 + board.width - 1;
+            },
+            Position::Up => {
+                self.position = Position::Right;
+                self.block2 = self.block1 - board.width;
+                self.block3 = self.block1 + board.width;
+                self.block4 = self.block1 + board.width + 1;
+            },
+            _ => ()
+        }
+    }
+
+    pub fn transform_reverse_leg(&mut self, board: &TetrisBoard){
+        match self.position {
+            Position::Right => {
+                self.position = Position::Down;
+                self.block2 = self.block1 - board.width - 1;
+                self.block3 = self.block1 - 1;
+                self.block4 = self.block1 + 1;
+            },
+            Position::Down => {
+                self.position = Position::Left;
+                self.block2 = self.block1 - board.width;
+                self.block3 = self.block1 + board.width - 1;
+                self.block4 = self.block1 + board.width;
+            },
+            Position::Left => {
+                self.position = Position::Up;
+                self.block2 = self.block1 - 1;
+                self.block3 = self.block1 + 1;
+                self.block4 = self.block1 + board.width + 1;
+            },
+            Position::Up => {
+                self.position = Position::Right;
+                self.block2 = self.block1 - board.width;
+                self.block3 = self.block1 - board.width + 1;
                 self.block4 = self.block1 + board.width;
             },
             _ => ()
