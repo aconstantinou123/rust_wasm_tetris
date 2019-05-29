@@ -154,7 +154,7 @@ pub struct TetrisBoard {
 impl TetrisBoard {
     pub fn new() -> TetrisBoard {
         utils::set_panic_hook();
-        let generate_new_shape = false;
+        let generate_new_shape = true;
         let space_used = add_walls();
         let height = 22;
         let width = 12;
@@ -169,6 +169,10 @@ impl TetrisBoard {
 
     pub fn get_generate_new_shape(&self) -> bool {
         self.generate_new_shape
+    }
+
+    pub fn set_generate_new_shape(&mut self) {
+        self.generate_new_shape = !self.generate_new_shape
     }
 
     pub fn get_height(&self) -> u32 {
@@ -224,7 +228,7 @@ impl TetrisBoard {
             for mut e in board_spaces.iter() {
                 self.space_used[*e as usize] = 2;
             }
-        self.generate_new_shape = true
+        self.set_generate_new_shape()
     }
 
     pub fn get_shape_position(&mut self, tetronimo: &Tetromino){
