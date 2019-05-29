@@ -498,7 +498,6 @@ impl TetrisBoard {
                 }
             }
         }
-        // log!("{}", result);
         result
     }
 
