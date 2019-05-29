@@ -19,7 +19,7 @@ macro_rules! log {
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Position {
     Up,
     Right,
@@ -29,7 +29,7 @@ pub enum Position {
 
 
 #[wasm_bindgen]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ShapeType {
     Bar,
     Square,
@@ -41,7 +41,7 @@ pub enum ShapeType {
 }
 
 #[wasm_bindgen]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Tetromino {
     block_size: u32,
     block1: u32,
@@ -180,9 +180,27 @@ impl TetrisBoard {
         self.space_used.len()
     }
 
-    pub fn update_shape_position(&mut self, tetronimo: &mut Tetromino) {
-        tetronimo.transform_bar(&self);
-        self.get_shape_position(tetronimo);
+    pub fn check_collision(&mut self, tetronimo_clone: &Tetromino) -> bool {
+        let board_spaces = [
+            tetronimo_clone.block1, 
+            tetronimo_clone.block2, 
+            tetronimo_clone.block3, 
+            tetronimo_clone.block4
+        ];
+        let mut result = true;
+        for (i, e) in self.space_used.iter().enumerate(){
+            let found_space = board_spaces.iter().find(|&&x| x == i as u32);
+            if(*e == 3){
+                match found_space {
+                    None => (),
+                    Some(i) => ({
+                        log!("{}", i);  
+                        result = false
+                    }),
+                }
+            }
+        }
+        result
     }
 
     pub fn check_wall_collision(&mut self, tetronimo: &Tetromino, direction: i32) -> bool {
@@ -223,13 +241,25 @@ impl TetrisBoard {
         }
     }
 
+    pub fn update_shape_position(&mut self, tetronimo: &mut Tetromino) {
+        let mut clone = tetronimo.clone();
+        clone.transform_bar(&self);
+        let can_move =self.check_collision(&clone);
+        if can_move == true {
+            tetronimo.transform_bar(&self);
+            self.get_shape_position(tetronimo);
+        }
+    }
+
     pub fn move_shape_down(& mut self, tetronimo: &mut Tetromino){
         tetronimo.move_shape_down(&self);
         self.get_shape_position(tetronimo);
     }
 
     pub fn move_shape_right(& mut self, tetronimo: &mut Tetromino){
-        let can_move = self.check_wall_collision(tetronimo, 1);
+        let mut clone = tetronimo.clone();
+        clone.move_shape_right();
+        let can_move =self.check_collision(&clone);
         if can_move == true {
             tetronimo.move_shape_right();
             self.get_shape_position(tetronimo);
@@ -237,7 +267,9 @@ impl TetrisBoard {
     }
 
     pub fn move_shape_left(& mut self, tetronimo: &mut Tetromino){
-        let can_move = self.check_wall_collision(tetronimo, -1);
+        let mut clone = tetronimo.clone();
+        clone.move_shape_left();
+        let can_move =self.check_collision(&clone);
         if can_move == true {
             tetronimo.move_shape_left();
             self.get_shape_position(tetronimo);
