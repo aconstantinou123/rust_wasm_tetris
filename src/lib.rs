@@ -143,7 +143,8 @@ pub fn add_walls() -> Vec<i32> {
 
 #[wasm_bindgen]
 #[derive(Debug)]
-pub struct TetrisBoard {
+pub struct TetrisBoard {    
+    generate_new_shape: bool,
     space_used: Vec<i32>,
     height: u32,
     width: u32,
@@ -153,15 +154,21 @@ pub struct TetrisBoard {
 impl TetrisBoard {
     pub fn new() -> TetrisBoard {
         utils::set_panic_hook();
+        let generate_new_shape = false;
         let space_used = add_walls();
         let height = 22;
         let width = 12;
 
         TetrisBoard {
+            generate_new_shape,
             space_used,
             height,
             width,
         }
+    }
+
+    pub fn get_generate_new_shape(&self) -> bool {
+        self.generate_new_shape
     }
 
     pub fn get_height(&self) -> u32 {
@@ -180,47 +187,44 @@ impl TetrisBoard {
         self.space_used.len()
     }
 
-    pub fn check_collision(&mut self, tetronimo_clone: &Tetromino) -> bool {
+    pub fn check_collision(&mut self, tetronimo_clone: &Tetromino) -> u32 {
         let board_spaces = [
             tetronimo_clone.block1, 
             tetronimo_clone.block2, 
             tetronimo_clone.block3, 
             tetronimo_clone.block4
         ];
-        let mut result = true;
-        for (i, e) in self.space_used.iter().enumerate(){
+        let mut result = 0;
+        let space_used_clone = self.space_used.clone();
+        for (i, e) in space_used_clone.iter().enumerate(){
             let found_space = board_spaces.iter().find(|&&x| x == i as u32);
-            if(*e == 3){
+            if *e == 3 {
+                match found_space {
+                    None => (),
+                    Some(i) => ({ 
+                        result = 3
+                    }),
+                }
+            } else if *e == 2 {
                 match found_space {
                     None => (),
                     Some(i) => ({
-                        log!("{}", i);  
-                        result = false
+                        result = 2
                     }),
                 }
             }
         }
+        // log!("{}", result);
         result
     }
 
-    pub fn check_wall_collision(&mut self, tetronimo: &Tetromino, direction: i32) -> bool {
-        let board_spaces: Vec <i32> = [tetronimo.block1 as i32, tetronimo.block2 as i32, tetronimo.block3 as i32, tetronimo.block4 as i32]
-            .into_iter()
-            .enumerate()
-            .map(|(i, e)| e + direction as i32)
-            .collect();
-        let mut result = true;
-        for space in board_spaces.iter() {
-            let mut counter = 0;
-            for element in self.space_used.iter_mut(){
-                if counter == *space as u32 && *element == 3 {
-                    result = false;
-                    break;
-                }
-                counter += 1;
+
+    pub fn add_shape_to_space_used(&mut self, tetronimo: &Tetromino) {
+        let board_spaces = [tetronimo.block1, tetronimo.block2, tetronimo.block3, tetronimo.block4];
+            for mut e in board_spaces.iter() {
+                self.space_used[*e as usize] = 2;
             }
-        }
-        result
+        self.generate_new_shape = true
     }
 
     pub fn get_shape_position(&mut self, tetronimo: &Tetromino){
@@ -245,24 +249,33 @@ impl TetrisBoard {
         let mut clone = tetronimo.clone();
         clone.transform_bar(&self);
         let can_move =self.check_collision(&clone);
-        if can_move == true {
+        if can_move == 0 {
             tetronimo.transform_bar(&self);
             self.get_shape_position(tetronimo);
         }
     }
 
     pub fn move_shape_down(& mut self, tetronimo: &mut Tetromino){
-        tetronimo.move_shape_down(&self);
-        self.get_shape_position(tetronimo);
+        let mut clone = tetronimo.clone();
+        clone.move_shape_down(&self);
+        let can_move =self.check_collision(&clone);
+        if can_move == 0 {
+            tetronimo.move_shape_down(&self);
+            self.get_shape_position(tetronimo);
+        } else if can_move == 2 {
+            self.add_shape_to_space_used(tetronimo) 
+        }
     }
 
     pub fn move_shape_right(& mut self, tetronimo: &mut Tetromino){
         let mut clone = tetronimo.clone();
         clone.move_shape_right();
         let can_move =self.check_collision(&clone);
-        if can_move == true {
+        if can_move == 0 {
             tetronimo.move_shape_right();
             self.get_shape_position(tetronimo);
+        } else if can_move == 2 {
+            self.add_shape_to_space_used(tetronimo) 
         }
     }
 
@@ -270,9 +283,11 @@ impl TetrisBoard {
         let mut clone = tetronimo.clone();
         clone.move_shape_left();
         let can_move =self.check_collision(&clone);
-        if can_move == true {
+        if can_move == 0 {
             tetronimo.move_shape_left();
             self.get_shape_position(tetronimo);
+        } else if can_move == 2 {
+            self.add_shape_to_space_used(tetronimo) 
         }
     }
 
