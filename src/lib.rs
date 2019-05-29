@@ -54,6 +54,16 @@ pub struct Tetromino {
 
 #[wasm_bindgen]
 impl Tetromino {
+
+
+    pub fn generate_random_shape(rand: u32) -> Tetromino {
+        match rand {
+            0 => Tetromino::new_bar_shape(),
+            1 => Tetromino::new_hat_shape(),
+            _ => Tetromino::new_bar_shape()
+        }
+    }
+
     pub fn new_bar_shape() -> Tetromino {
         utils::set_panic_hook();
         let block_size = 50;
@@ -63,6 +73,27 @@ impl Tetromino {
         let block4 = block1 + 3;
         let position = Position::Right;
         let shape_type = ShapeType::Bar;
+
+        Tetromino {
+            block_size,
+            block1,
+            block2,
+            block3,
+            block4,
+            position,
+            shape_type,
+        }
+    }
+
+    pub fn new_hat_shape() -> Tetromino {
+        utils::set_panic_hook();
+        let block_size = 50;
+        let block1 = 5;
+        let block2 = block1 - 12;
+        let block3 = block1 + 1;
+        let block4 = block1 + 12;
+        let position = Position::Right;
+        let shape_type = ShapeType::Hat;
 
         Tetromino {
             block_size,
@@ -101,6 +132,14 @@ impl Tetromino {
         self.block4 = self.block4 - 1;
     }
 
+    pub fn transform_shape(&mut self, board: &TetrisBoard){
+        match self.shape_type {
+            ShapeType::Bar => self.transform_bar(board),
+            ShapeType::Hat => self.transform_hat(board),
+            _ => ()
+        }
+    }
+
     pub fn transform_bar(&mut self, board: &TetrisBoard){
         match self.position {
             Position::Right => {
@@ -114,6 +153,36 @@ impl Tetromino {
                 self.block2 = self.block1 + 1;
                 self.block3 = self.block1 + 2;
                 self.block4 = self.block1 + 3;
+            },
+            _ => ()
+        }
+    }
+
+    pub fn transform_hat(&mut self, board: &TetrisBoard){
+        match self.position {
+            Position::Right => {
+                self.position = Position::Down;
+                self.block2 = self.block1 - board.width;
+                self.block3 = self.block1 - 1;
+                self.block4 = self.block1 + 1;
+            },
+            Position::Down => {
+                self.position = Position::Left;
+                self.block2 = self.block1 - board.width;
+                self.block3 = self.block1 - 1;
+                self.block4 = self.block1 + board.width;
+            },
+            Position::Left => {
+                self.position = Position::Up;
+                self.block2 = self.block1 - 1;
+                self.block3 = self.block1 + 1;
+                self.block4 = self.block1 + board.width;
+            },
+            Position::Up => {
+                self.position = Position::Right;
+                self.block2 = self.block1 - board.width;
+                self.block3 = self.block1 + 1;
+                self.block4 = self.block1 + board.width;
             },
             _ => ()
         }
@@ -133,7 +202,7 @@ pub fn add_walls() -> Vec<i32> {
                     e = 3
                 }
                 else if i >= 252 {
-                    e = 2
+                    e = 4
                 }
                 e
             }).collect();
@@ -209,7 +278,7 @@ impl TetrisBoard {
                         result = 3
                     }),
                 }
-            } else if *e == 2 {
+            } else if *e == 2 || *e == 4 {
                 match found_space {
                     None => (),
                     Some(i) => ({
@@ -251,10 +320,10 @@ impl TetrisBoard {
 
     pub fn update_shape_position(&mut self, tetronimo: &mut Tetromino) {
         let mut clone = tetronimo.clone();
-        clone.transform_bar(&self);
+        clone.transform_shape(&self);
         let can_move =self.check_collision(&clone);
         if can_move == 0 {
-            tetronimo.transform_bar(&self);
+            tetronimo.transform_shape(&self);
             self.get_shape_position(tetronimo);
         }
     }
@@ -278,9 +347,7 @@ impl TetrisBoard {
         if can_move == 0 {
             tetronimo.move_shape_right();
             self.get_shape_position(tetronimo);
-        } else if can_move == 2 {
-            self.add_shape_to_space_used(tetronimo) 
-        }
+        } 
     }
 
     pub fn move_shape_left(& mut self, tetronimo: &mut Tetromino){
@@ -290,9 +357,7 @@ impl TetrisBoard {
         if can_move == 0 {
             tetronimo.move_shape_left();
             self.get_shape_position(tetronimo);
-        } else if can_move == 2 {
-            self.add_shape_to_space_used(tetronimo) 
-        }
+        } 
     }
 
     pub fn render(&self) -> String {
