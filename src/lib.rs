@@ -587,6 +587,7 @@ impl fmt::Display for TetrisBoard {
             1 => symbol = "1",
             2 => symbol = "2",
             3 => symbol = "3",
+            4 => symbol = "4",
             _ => (),
         }
         write!(f, "{}", symbol)?;
