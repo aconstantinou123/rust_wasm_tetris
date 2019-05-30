@@ -63,7 +63,7 @@ const drawShapes = () => {
 document.addEventListener('keydown', (event) => {
   const key = event.key
   if(!tetrisBoard.get_generate_new_shape()){
-    if(key === 'Enter'){
+    if(key === 'w'){
       tetrisBoard.update_shape_position(tetronimo)
       clearRect()
       drawShapes()
@@ -78,7 +78,7 @@ setInterval(() => {
     drawShapes()
   } else {
     const rand = getRandomInt(7)
-    tetronimo = Tetromino.generate_random_shape(6)
+    tetronimo = Tetromino.generate_random_shape(rand)
     tetrisBoard.get_shape_position(tetronimo)
     tetrisBoard.set_generate_new_shape()
   }
