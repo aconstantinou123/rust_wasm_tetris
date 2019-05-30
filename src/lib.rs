@@ -75,11 +75,11 @@ impl Tetromino {
         let block_size = 50;
         let block1 = 5;
         let block2 = block1 + 1;
-        let block3 = block1 - 11;
+        let block3 = block1 + 11;
         let block4 = block1 + 12;
         let position = Position::Right;
         let shape_type = ShapeType::ReverseStep;
-
+        log!("here");
         Tetromino {
             block_size,
             block1,
