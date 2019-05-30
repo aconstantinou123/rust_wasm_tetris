@@ -501,21 +501,19 @@ impl TetrisBoard {
     pub fn check_for_completed_row(&mut self) {
         for mut i in 0..self.height as usize {
             let position = i * 12;
-            log!("{}", self.width as usize);
             let slice = &self.space_used[position..position + self.width as usize];
             let mut map = HashMap::new();
             for num in slice.iter() {
                 let count = map.entry(num).or_insert(0);
                 *count += 1;
             }
-            let mut indexes: Vec<usize> = (position + 1..position + self.width as usize - 1).collect();
+            let mut indexes: Vec<usize> = (position..position + self.width as usize).collect();
             let twos = map.get(&2);
-            match(twos){
+            match twos {
                 Some(10) => {
-                    log!("here");
-                    for i in indexes.iter() {
-                        self.space_used[*i as usize] = 0;
-                    }
+                    self.space_used.drain(indexes[0]..indexes[indexes.len() - 1] + 1);
+                    let vec :Vec<i32> = vec![3, 0, 0, 0, 0, 0, 0, 0, 0 , 0, 0, 3];
+                    self.space_used.splice(0..0, vec);
                 },
                 None => (),
                 _ => (),
