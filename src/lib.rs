@@ -2,6 +2,7 @@ mod utils;
 
 use wasm_bindgen::prelude::*;
 use std::fmt;
+use std::collections::HashMap;
 
 extern crate web_sys;
 
@@ -140,7 +141,6 @@ impl Tetromino {
         let block4 = block1 + 12;
         let position = Position::Right;
         let shape_type = ShapeType::ReverseLeg;
-        log!("here");
         Tetromino {
             block_size,
             block1,
@@ -498,6 +498,27 @@ impl TetrisBoard {
         result
     }
 
+    pub fn check_for_completed_row(&mut self) {
+        for mut i in 0..22 {
+            let position = i * 12;
+            let slice = &self.space_used[position..position+12];
+            let mut map = HashMap::new();
+            for num in slice.iter() {
+                let count = map.entry(num).or_insert(0);
+                *count += 1;
+            }
+            let mut indexes: Vec<usize> = (position..position+12).collect();
+            let twos = map.get(&2);
+            match(twos){
+                Some(10) => {
+                    log!("here")
+                },
+                None => (),
+                _ => (),
+            }
+        }
+    }
+
 
     pub fn add_shape_to_space_used(&mut self, tetronimo: &Tetromino) {
         let board_spaces = [tetronimo.block1, tetronimo.block2, tetronimo.block3, tetronimo.block4];
@@ -543,7 +564,8 @@ impl TetrisBoard {
             tetronimo.move_shape_down(&self);
             self.get_shape_position(tetronimo);
         } else if can_move == 2 {
-            self.add_shape_to_space_used(tetronimo) 
+            self.add_shape_to_space_used(tetronimo);
+            self.check_for_completed_row();
         }
     }
 
