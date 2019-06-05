@@ -333,7 +333,6 @@ impl Tetromino {
                 self.block3 = self.block1 + 1;
                 self.block4 = self.block1 + board.width;
             },
-            _ => ()
         }
     }
 
@@ -363,7 +362,6 @@ impl Tetromino {
                 self.block3 = self.block1 + board.width;
                 self.block4 = self.block1 + board.width + 1;
             },
-            _ => ()
         }
     }
 
@@ -393,7 +391,6 @@ impl Tetromino {
                 self.block3 = self.block1 - board.width + 1;
                 self.block4 = self.block1 + board.width;
             },
-            _ => ()
         }
     }
 }
@@ -415,7 +412,6 @@ pub fn add_walls() -> Vec<i32> {
                 }
                 e
             }).collect();
-        log!("{:?}", space_used);
         space_used
     }
 
@@ -528,21 +524,23 @@ impl TetrisBoard {
 
     pub fn check_for_completed_row(&mut self) {
         let mut number_of_lines = 0;
-        for mut i in 0..self.height as usize {
-            let position = i * 12;
+        for i in 0..self.height as usize {
+            let position = i * self.width as usize;
             let slice = &self.space_used[position..position + self.width as usize];
             let mut map = HashMap::new();
             for num in slice.iter() {
                 let count = map.entry(num).or_insert(0);
                 *count += 1;
             }
-            let mut indexes: Vec<usize> = (position..position + self.width as usize).collect();
+            let indexes: Vec<usize> = (position..position + self.width as usize).collect();
             let twos = map.get(&2);
             match twos {
                 Some(10) => {
                     number_of_lines += 1;
                     self.space_used.drain(indexes[0]..indexes[indexes.len() - 1] + 1);
-                    let vec :Vec<i32> = vec![3, 0, 0, 0, 0, 0, 0, 0, 0 , 0, 0, 3];
+                    let mut vec :Vec<i32> = vec![0; self.width as usize];
+                    vec[0] = 3;
+                    vec[self.width as usize - 1] = 3;
                     self.space_used.splice(0..0, vec);
                 },
                 None => (),
@@ -555,7 +553,7 @@ impl TetrisBoard {
 
     pub fn add_shape_to_space_used(&mut self, tetronimo: &Tetromino) {
         let board_spaces = [tetronimo.block1, tetronimo.block2, tetronimo.block3, tetronimo.block4];
-            for mut e in board_spaces.iter() {
+            for e in board_spaces.iter() {
                 self.space_used[*e as usize] = 2;
             }
         self.set_generate_new_shape()
@@ -597,7 +595,6 @@ impl TetrisBoard {
             tetronimo.move_shape_down(&self);
             self.get_shape_position(tetronimo);
         } else if can_move == 2 {
-            // self.add_shape_to_space_used(tetronimo);
             self.check_shape_is_out_of_bounds(&tetronimo);
             self.check_for_completed_row();
         }
