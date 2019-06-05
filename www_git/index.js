@@ -17,27 +17,39 @@ const ctx = canvas.getContext('2d')
 
 const getRandomInt = (max) => Math.floor(Math.random() * Math.floor(max))
 
+const scoreHeader = document.getElementById("score")
+scoreHeader.innerText = 'Score: 0'
+
+const renderScore = () => {
+  const scoreHeader = document.getElementById("score")
+  const score = tetrisBoard.get_score()
+  scoreHeader.innerText = `Score: ${score}`
+}
+
 const clearRect = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 }
 
 document.addEventListener('keydown', function(event) {
   const key = event.key
-  if(!tetrisBoard.get_generate_new_shape()){
+  if(!tetrisBoard.get_generate_new_shape() && !tetrisBoard.get_game_over()){
     if(key === 'd'){
       tetrisBoard.move_shape_right(tetronimo)
       clearRect()
       drawShapes()
+      renderScore()
     } 
     else if(key === 'a'){
       tetrisBoard.move_shape_left(tetronimo)
       clearRect()
       drawShapes()
+      renderScore()
     } 
     else if(key == 's'){
       tetrisBoard.move_shape_down(tetronimo)
       clearRect()
       drawShapes()
+      renderScore()
     }
   }
 })
@@ -61,7 +73,7 @@ const drawShapes = () => {
 
 document.addEventListener('keydown', (event) => {
   const key = event.key
-  if(!tetrisBoard.get_generate_new_shape()){
+  if(!tetrisBoard.get_generate_new_shape() && !tetrisBoard.get_game_over()){
     if(key === 'w'){
       tetrisBoard.update_shape_position(tetronimo)
       clearRect()
@@ -76,13 +88,17 @@ let interval = setInterval(() => {
     tetrisBoard.move_shape_down(tetronimo)
     clearRect()
     drawShapes()
+    renderScore()
   } else if(!tetrisBoard.get_game_over()) {
     const rand = getRandomInt(7)
     tetronimo = Tetromino.generate_random_shape(rand)
     tetrisBoard.get_shape_position(tetronimo)
     tetrisBoard.set_generate_new_shape()
-  } else {
-    console.log('game over')
+  } else if(tetrisBoard.get_game_over()) {
+    console.log('game over', tetrisBoard.get_score())
+    const scoreHeader = document.getElementById("score")
+    const score = tetrisBoard.get_score()
+    scoreHeader.innerText = `Game over. Final Score: ${score}`
     clearInterval(interval)
   }
 }, 200)

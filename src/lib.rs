@@ -427,6 +427,7 @@ pub struct TetrisBoard {
     height: u32,
     width: u32,
     game_over: bool,
+    score: u32,
 }
 
 #[wasm_bindgen]
@@ -438,6 +439,7 @@ impl TetrisBoard {
         let height = 22;
         let width = 12;
         let game_over = false;
+        let score = 0;
 
         TetrisBoard {
             generate_new_shape,
@@ -445,7 +447,12 @@ impl TetrisBoard {
             height,
             width,
             game_over,
+            score,
         }
+    }
+
+    pub fn get_score(&self) -> u32 {
+        self.score
     }
 
     pub fn get_game_over(&self) -> bool {
@@ -484,6 +491,7 @@ impl TetrisBoard {
             tetronimo_clone.block4 as i32
         ];
         let out_of_bounds = board_spaces.iter().find(|&&x| x < 0);
+        log!("{:?}", out_of_bounds);
         match out_of_bounds {
             Some(i) => self.game_over = true,
             None => self.add_shape_to_space_used(&tetronimo_clone),
@@ -520,6 +528,7 @@ impl TetrisBoard {
     }
 
     pub fn check_for_completed_row(&mut self) {
+        let mut number_of_lines = 0;
         for mut i in 0..self.height as usize {
             let position = i * 12;
             let slice = &self.space_used[position..position + self.width as usize];
@@ -532,6 +541,7 @@ impl TetrisBoard {
             let twos = map.get(&2);
             match twos {
                 Some(10) => {
+                    number_of_lines += 1;
                     self.space_used.drain(indexes[0]..indexes[indexes.len() - 1] + 1);
                     let vec :Vec<i32> = vec![3, 0, 0, 0, 0, 0, 0, 0, 0 , 0, 0, 3];
                     self.space_used.splice(0..0, vec);
@@ -540,6 +550,7 @@ impl TetrisBoard {
                 _ => (),
             }
         }
+        self.score += number_of_lines * number_of_lines * 10;
     }
 
 
