@@ -491,7 +491,6 @@ impl TetrisBoard {
             tetronimo_clone.block4 as i32
         ];
         let out_of_bounds = board_spaces.iter().find(|&&x| x < 0);
-        log!("{:?}", out_of_bounds);
         match out_of_bounds {
             Some(i) => self.game_over = true,
             None => self.add_shape_to_space_used(&tetronimo_clone),
