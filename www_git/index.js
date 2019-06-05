@@ -2,11 +2,11 @@ import { TetrisBoard, Tetromino } from "tetris";
 import { memory } from 'tetris/tetris_bg'
 
 let tetronimo
-const blockSize = 50
+const blockSize = 40
 const tetrisBoard = TetrisBoard.new()
 const spaceLength = tetrisBoard.get_space_length()
-const height = tetrisBoard.get_height() * 50
-const width = tetrisBoard.get_width() * 50
+const height = tetrisBoard.get_height() * 40
+const width = tetrisBoard.get_width() * 40
 // tetrisBoard.get_shape_position(tetronimo)
 tetrisBoard.render()
 
