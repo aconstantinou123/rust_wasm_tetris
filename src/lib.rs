@@ -426,6 +426,7 @@ pub struct TetrisBoard {
     space_used: Vec<i32>,
     height: u32,
     width: u32,
+    game_over: bool,
 }
 
 #[wasm_bindgen]
@@ -436,13 +437,19 @@ impl TetrisBoard {
         let space_used = add_walls();
         let height = 22;
         let width = 12;
+        let game_over = false;
 
         TetrisBoard {
             generate_new_shape,
             space_used,
             height,
             width,
+            game_over,
         }
+    }
+
+    pub fn get_game_over(&self) -> bool {
+        self.game_over
     }
 
     pub fn get_generate_new_shape(&self) -> bool {
@@ -467,6 +474,20 @@ impl TetrisBoard {
 
     pub fn get_space_length(&self) -> usize {
         self.space_used.len()
+    }
+
+    pub fn check_shape_is_out_of_bounds(&mut self, tetronimo_clone: &Tetromino) {
+        let board_spaces = [
+            tetronimo_clone.block1 as i32, 
+            tetronimo_clone.block2 as i32, 
+            tetronimo_clone.block3 as i32, 
+            tetronimo_clone.block4 as i32
+        ];
+        let out_of_bounds = board_spaces.iter().find(|&&x| x < 0);
+        match out_of_bounds {
+            Some(i) => self.game_over = true,
+            None => self.add_shape_to_space_used(&tetronimo_clone),
+        }
     }
 
     pub fn check_collision(&mut self, tetronimo_clone: &Tetromino) -> u32 {
@@ -536,7 +557,7 @@ impl TetrisBoard {
                 *element = 0
             }
         }
-        let board_spaces = [tetronimo.block1, tetronimo.block2, tetronimo.block3, tetronimo.block4];
+        let board_spaces = [tetronimo.block1 as i32, tetronimo.block2 as i32, tetronimo.block3 as i32, tetronimo.block4 as i32];
         for space in board_spaces.iter() {
             let mut counter = 0;
             for element in self.space_used.iter_mut(){
@@ -566,7 +587,8 @@ impl TetrisBoard {
             tetronimo.move_shape_down(&self);
             self.get_shape_position(tetronimo);
         } else if can_move == 2 {
-            self.add_shape_to_space_used(tetronimo);
+            // self.add_shape_to_space_used(tetronimo);
+            self.check_shape_is_out_of_bounds(&tetronimo);
             self.check_for_completed_row();
         }
     }

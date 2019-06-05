@@ -17,7 +17,6 @@ const ctx = canvas.getContext('2d')
 
 const getRandomInt = (max) => Math.floor(Math.random() * Math.floor(max))
 
-
 const clearRect = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 }
@@ -71,18 +70,22 @@ document.addEventListener('keydown', (event) => {
   }
 })
 
-setInterval(() => {
-  if(!tetrisBoard.get_generate_new_shape()){
+
+let interval = setInterval(() => {
+  if(!tetrisBoard.get_generate_new_shape() && !tetrisBoard.get_game_over()){
     tetrisBoard.move_shape_down(tetronimo)
     clearRect()
     drawShapes()
-  } else {
+  } else if(!tetrisBoard.get_game_over()) {
     const rand = getRandomInt(7)
     tetronimo = Tetromino.generate_random_shape(rand)
     tetrisBoard.get_shape_position(tetronimo)
     tetrisBoard.set_generate_new_shape()
+  } else {
+    console.log('game over')
+    clearInterval(interval)
   }
-}, 500)
+}, 200)
 
 // ctx.fillRect(100, 400, blockSize, blockSize)
 
