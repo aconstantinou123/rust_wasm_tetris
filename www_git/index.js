@@ -96,7 +96,7 @@ const update = () => {
 
 document.addEventListener('keydown', function(event) {
   const key = event.key
-  if(!tetrisBoard.get_generate_new_shape() && !tetrisBoard.get_game_over()){
+  if(!tetrisBoard.get_generate_new_shape() && !tetrisBoard.get_game_over() && !paused){
     if(key === 'd'){
       tetrisBoard.move_shape_right(tetronimo)
       update()
@@ -130,7 +130,7 @@ const drawShapes = () => {
 
 document.addEventListener('keydown', (event) => {
   const key = event.key
-  if(!tetrisBoard.get_generate_new_shape() && !tetrisBoard.get_game_over()){
+  if(!tetrisBoard.get_generate_new_shape() && !tetrisBoard.get_game_over() && !paused){
     if(key === 'w'){
       tetrisBoard.update_shape_position(tetronimo)
       update()
@@ -155,10 +155,10 @@ const drawPreview = (previewTetronimo) => {
 
 const startInterval = (speed) => {
   interval = setInterval(() => {
-    if(!tetrisBoard.get_generate_new_shape() && !tetrisBoard.get_game_over()){
+    if(!tetrisBoard.get_generate_new_shape() && !tetrisBoard.get_game_over() && !paused){
       tetrisBoard.move_shape_down(tetronimo)
       update()
-    } else if(!tetrisBoard.get_game_over()) {
+    } else if(!tetrisBoard.get_game_over() && !paused) {
       if(rand === undefined){
         rand = getRandomInt(7)
       }
@@ -172,20 +172,37 @@ const startInterval = (speed) => {
       const scoreHeader = document.getElementById("score")
       const score = tetrisBoard.get_score()
       scoreHeader.innerText = `Game over. Final Score: ${score}`
+      startButton.innerText = 'Start Game'
       clearInterval(interval)
     }
   }, speed);
+}
+
+const resetGame = () => {
+  startButton.innerText = 'Pause'
+  tetrisBoard = TetrisBoard.new()
+  tetrisBoard.get_game_over()
+  startPressed = true
+  paused = false
+  startInterval(increaseSpeed())
 }
 
 startButton.addEventListener('click', () => {
   if(!startPressed){
     startPressed = true
     startInterval(increaseSpeed())
-  } else if(tetrisBoard.get_game_over()) {
-    tetrisBoard = TetrisBoard.new()
-    tetrisBoard.get_game_over()
-    startPressed = true
-    startInterval(increaseSpeed())
+    startButton.innerText = 'Pause'
+  }
+  else if(tetrisBoard.get_game_over()) {
+    resetGame()
+  }
+  else if (!paused){
+    paused = true
+    startButton.innerText = 'Continue'
+  } 
+  else if (paused){
+    paused = false
+    startButton.innerText = 'Pause'
   }
 })
 
