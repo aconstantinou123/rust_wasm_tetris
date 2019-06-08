@@ -219,6 +219,22 @@ impl Tetromino {
         self.block_size
     }
 
+    pub fn get_block1(&self) -> i32 {
+        self.block1 as i32
+    }
+
+    pub fn get_block2(&self) -> i32 {
+        self.block2 as i32
+    }
+
+    pub fn get_block3(&self) -> i32 {
+        self.block3 as i32
+    }
+
+    pub fn get_block4(&self) -> i32 {
+        self.block4 as i32
+    }
+
     pub fn move_shape_down(&mut self, board: &TetrisBoard) {
         self.block1 = self.block1 + board.width;
         self.block2 = self.block2 + board.width;
