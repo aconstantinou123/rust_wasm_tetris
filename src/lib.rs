@@ -177,9 +177,9 @@ impl Tetromino {
         utils::set_panic_hook();
         let block_size = 50;
         let block1 = 5;
-        let block2 = block1 + 1;
-        let block3 = block1 + 2;
-        let block4 = block1 + 3;
+        let block2 = block1 - 1;
+        let block3 = block1 + 1;
+        let block4 = block1 + 2;
         let position = Position::Right;
         let shape_type = ShapeType::Bar;
 
@@ -273,15 +273,15 @@ impl Tetromino {
         match self.position {
             Position::Right => {
                 self.position = Position::Down;
-                self.block2 = self.block1 + board.width;
-                self.block3 = self.block1 + (2 * board.width);
-                self.block4 = self.block1 + (3 * board.width);
+                self.block2 = self.block1 - board.width;
+                self.block3 = self.block1 + board.width;
+                self.block4 = self.block1 + (2 * board.width);
             },
             Position::Down => {
                 self.position = Position::Right;
-                self.block2 = self.block1 + 1;
-                self.block3 = self.block1 + 2;
-                self.block4 = self.block1 + 3;
+                self.block2 = self.block1 - 1;
+                self.block3 = self.block1 + 1;
+                self.block4 = self.block1 + 2;
             },
             _ => ()
         }
