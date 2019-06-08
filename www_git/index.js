@@ -5,12 +5,14 @@ let rand
 let tetronimo
 let previewTetronimo
 let interval
+let tetrisBoard = TetrisBoard.new()
 const blockSize = 37
-const tetrisBoard = TetrisBoard.new()
 const spaceLength = tetrisBoard.get_space_length()
 const height = tetrisBoard.get_height() * 37
 const width = tetrisBoard.get_width() * 37
+const startButton = document.getElementById("start")
 let startPressed = false
+let paused = false
 tetrisBoard.render()
 
 const canvas = document.getElementById("tetris-canvas")
@@ -35,12 +37,6 @@ childList: true,
 }
 
 const increaseSpeed = () => {
-  if(tetrisBoard.get_score() >= 1350){
-    return 50
-  }
-  if(tetrisBoard.get_score() >= 1200){
-    return 100
-  }
   if(tetrisBoard.get_score() >= 1050){
     return 150
   }
@@ -181,9 +177,13 @@ const startInterval = (speed) => {
   }, speed);
 }
 
-const startButton = document.getElementById("start")
 startButton.addEventListener('click', () => {
   if(!startPressed){
+    startPressed = true
+    startInterval(increaseSpeed())
+  } else if(tetrisBoard.get_game_over()) {
+    tetrisBoard = TetrisBoard.new()
+    tetrisBoard.get_game_over()
     startPressed = true
     startInterval(increaseSpeed())
   }

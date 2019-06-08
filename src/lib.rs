@@ -471,6 +471,10 @@ impl TetrisBoard {
         self.game_over
     }
 
+    pub fn set_game_over(&mut self) {
+        self.game_over = !self.get_game_over()
+    }
+
     pub fn get_generate_new_shape(&self) -> bool {
         self.generate_new_shape
     }
