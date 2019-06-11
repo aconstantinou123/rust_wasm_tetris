@@ -6,10 +6,10 @@ let tetronimo
 let previewTetronimo
 let interval
 let tetrisBoard = TetrisBoard.new()
-const blockSize = 37
+const blockSize = 36
 const spaceLength = tetrisBoard.get_space_length()
-const height = tetrisBoard.get_height() * 37
-const width = tetrisBoard.get_width() * 37
+const height = tetrisBoard.get_height() * blockSize
+const width = tetrisBoard.get_width() * blockSize
 const startButton = document.getElementById("start")
 let startPressed = false
 let paused = false
