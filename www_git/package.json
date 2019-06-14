@@ -29,6 +29,7 @@
   "homepage": "https://github.com/rustwasm/create-wasm-app#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "ms": "^2.1.2",
     "tetris": "file:../pkg"
   },
   "devDependencies": {
