@@ -1,1 +1,1 @@
-web: cd www_git && npm install && npm run build && npm start
+web: cd www_git && npm install && npm start
