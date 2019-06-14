@@ -1,1 +1,1 @@
-web: cd www_git && npm install npm@latest -g && npm install --only=dev && npm run build && npm start
+web: cd www_git && npm install --only=dev && npm run build && npm start
