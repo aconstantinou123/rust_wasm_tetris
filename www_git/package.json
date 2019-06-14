@@ -7,10 +7,9 @@
     "create-wasm-app": ".bin/create-wasm-app.js"
   },
   "scripts": {
-    "postinstall": "cd client && npm install",
     "build": "webpack --config webpack.config.js",
     "dev": "webpack-dev-server",
-    "start":"node server.js"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
