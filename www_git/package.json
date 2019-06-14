@@ -7,8 +7,10 @@
     "create-wasm-app": ".bin/create-wasm-app.js"
   },
   "scripts": {
+    "postinstall": "cd client && npm install",
     "build": "webpack --config webpack.config.js",
-    "start": "webpack-dev-server"
+    "dev": "webpack-dev-server",
+    "start":"node server.js"
   },
   "repository": {
     "type": "git",
@@ -27,6 +29,7 @@
   },
   "homepage": "https://github.com/rustwasm/create-wasm-app#readme",
   "dependencies": {
+    "express": "^4.17.1",
     "tetris": "file:../pkg"
   },
   "devDependencies": {
