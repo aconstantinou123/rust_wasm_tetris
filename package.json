@@ -8,8 +8,8 @@
   },
   "scripts": {
     "postinstall": "cd client && npm install",
-    "build": "cd www_git && webpack --config webpack.config.js",
-    "start":"www_git/node server.js"
+    "build": "webpack --config webpack.config.js",
+    "start":"node server.js"
   },
   "repository": {
     "type": "git",
