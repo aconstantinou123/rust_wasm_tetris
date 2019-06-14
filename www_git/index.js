@@ -6,7 +6,7 @@ let tetronimo
 let previewTetronimo
 let interval
 let tetrisBoard = TetrisBoard.new()
-const blockSize = 36
+const blockSize = 35
 const spaceLength = tetrisBoard.get_space_length()
 const height = tetrisBoard.get_height() * blockSize
 const width = tetrisBoard.get_width() * blockSize
@@ -21,8 +21,8 @@ canvas.width = width
 const ctx = canvas.getContext('2d')
 
 const previewCanvas = document.getElementById("tetris-preview-canvas")
-previewCanvas.height = 5 * 37
-previewCanvas.width = 7 * 37
+previewCanvas.height = 5 * 35
+previewCanvas.width = 7 * 35
 const previewCtx = previewCanvas.getContext('2d')
 
 const getRandomInt = (max) => Math.floor(Math.random() * Math.floor(max))
